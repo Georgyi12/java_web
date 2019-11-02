@@ -1,0 +1,107 @@
+import templater.PageGenerator;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.HashMap;
+import java.util.Map;
+
+public class MainServlet extends HttpServlet {
+
+    public void doGet(HttpServletRequest request , HttpServletResponse response) throws ServletException, IOException{
+        PrintWriter writer = response.getWriter();
+        String value = request.getParameter("value");
+
+        writer.println(value);
+        response.setContentType("text/html;charset=utf-8");
+    }
+
+    public void doPost(HttpServletRequest request,
+                       HttpServletResponse response) throws ServletException, IOException {
+
+        String value = request.getParameter("value");
+
+        response.setContentType("text/html;charset=utf-8");
+
+        if (value == null || value.isEmpty()) {
+            response.getWriter().println(Integer.parseInt(value ) == 0);
+            response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+        } else {
+            response.getWriter().println(Integer.parseInt(value) * 2);
+            response.setStatus(HttpServletResponse.SC_OK);
+        }
+
+    }
+
+}
+
+
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.servlet.ServletContextHandler;
+import org.eclipse.jetty.servlet.ServletHolder;
+import servlets.AllRequestsServlet;
+import servlets.MainServlet;
+
+import static sun.net.www.protocol.http.AuthCacheValue.Type.Server;
+
+public class Main {
+    public static void main(String[] args) throws Exception {
+        AllRequestsServlet allRequestsServlet = new AllRequestsServlet();
+        MainServlet mainServlet = new MainServlet();
+
+        ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
+        context.addServlet(new ServletHolder(allRequestsServlet), "/*");
+
+        ServletContextHandler mainSer = new ServletContextHandler(ServletContextHandler.SESSIONS);
+        mainSer.addServlet(new ServletHolder(mainServlet), "/mult");
+
+
+
+        Server server = new Server(7970);
+        server.setHandler(context);
+
+        server.start();
+        server.join();
+    }
+}
+
+
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+    <meta charset="UTF-8"/>
+    <title>L1.1</title>
+</head>
+
+<body>
+
+<form action="/page.html" method="POST">
+    Login: <input type="text" name="message"/>
+    <input type="submit" value="Ok">
+</form>
+
+<p>Message: ${message}</p>
+
+<p>Method: ${method}</p>
+
+<p>URL: ${URL}</p>
+
+<p>PathInfo: ${pathInfo}</p>
+
+<p>SessionId: ${sessionId}</p>
+
+<p>Parameters: ${parameters}</p>
+
+</body>
+
+</html>
+
+
+
+
+
+
